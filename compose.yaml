@@ -122,18 +122,17 @@ services:
     restart: unless-stopped
 
   # ===========================================================================
-  # Logstash - File Log Ingestion (Optional)
+  # Filebeat - Lightweight Log Shipper
   # ===========================================================================
-  logstash:
-    image: docker.io/logstash:8.12.2
-    container_name: logstash
-    profiles:
-      - logstash
+  filebeat:
+    image: docker.io/elastic/filebeat:8.12.2
+    container_name: filebeat
+    user: root
+    command: filebeat -e -strict.perms=false
     volumes:
-      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
-      - ${OPENCLAW_LOG_PATH:-/tmp/openclaw}:/var/log/openclaw:ro
-    environment:
-      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /tmp/openclaw:/var/log/openclaw:ro
+      - filebeat-data:/usr/share/filebeat/data
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -143,3 +142,4 @@ volumes:
   elasticsearch-data:
   grafana-data:
   langfuse-postgres-data:
+  filebeat-data:

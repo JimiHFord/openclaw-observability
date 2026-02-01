@@ -1,0 +1,38 @@
+filebeat.inputs:
+  - type: log
+    id: openclaw-logs
+    enabled: true
+    paths:
+      - /var/log/openclaw/openclaw-*.log
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.message_key: "1"
+    processors:
+      - rename:
+          fields:
+            - from: "0"
+              to: "subsystem"
+            - from: "1"
+              to: "message"
+          ignore_missing: true
+          fail_on_error: false
+      - rename:
+          fields:
+            - from: "_meta.logLevelName"
+              to: "level"
+          ignore_missing: true
+          fail_on_error: false
+      - drop_fields:
+          fields: ["_meta", "log", "input", "agent", "ecs"]
+          ignore_missing: true
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+  index: "openclaw-logs-%{+yyyy.MM.dd}"
+
+setup.template.name: "openclaw-logs"
+setup.template.pattern: "openclaw-logs-*"
+setup.ilm.enabled: false
+
+logging.level: info
+logging.to_stderr: true
