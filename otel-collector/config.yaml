@@ -58,7 +58,6 @@ exporters:
       enabled: true
       initial_interval: 100ms
       max_interval: 30s
-      max_elapsed_time: 5m
 
   # Prometheus metrics endpoint (Grafana scrapes this)
   prometheus:
