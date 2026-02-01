@@ -1,7 +1,5 @@
 {
-  "annotations": {
-    "list": []
-  },
+  "annotations": { "list": [] },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -10,10 +8,7 @@
   "liveNow": false,
   "panels": [
     {
-      "datasource": {
-        "type": "elasticsearch",
-        "uid": "Elasticsearch-Logs"
-      },
+      "datasource": { "type": "elasticsearch", "uid": "Elasticsearch-Logs" },
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
       "id": 1,
       "options": {
@@ -21,18 +16,14 @@
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["count"],
-          "fields": "",
-          "values": false
-        },
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
         "textMode": "auto"
       },
-      "pluginVersion": "10.3.3",
       "targets": [
         {
           "datasource": { "type": "elasticsearch", "uid": "Elasticsearch-Logs" },
           "metrics": [{ "id": "1", "type": "count" }],
+          "bucketAggs": [],
           "query": "*",
           "refId": "A",
           "timeField": "@timestamp"
@@ -42,36 +33,7 @@
       "type": "stat"
     },
     {
-      "datasource": {
-        "type": "elasticsearch",
-        "uid": "Elasticsearch-Logs"
-      },
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
-      "id": 2,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["count"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "10.3.3",
-      "targets": [
-        {
-          "datasource": { "type": "elasticsearch", "uid": "Elasticsearch-Logs" },
-          "metrics": [{ "id": "1", "type": "count" }],
-          "query": "level:ERROR OR level:FATAL",
-          "refId": "A",
-          "timeField": "@timestamp"
-        }
-      ],
-      "title": "Errors",
-      "type": "stat",
+      "datasource": { "type": "elasticsearch", "uid": "Elasticsearch-Logs" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -83,26 +45,40 @@
             ]
           }
         }
-      }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "elasticsearch", "uid": "Elasticsearch-Logs" },
+          "metrics": [{ "id": "1", "type": "count" }],
+          "bucketAggs": [],
+          "query": "level:ERROR OR level:FATAL",
+          "refId": "A",
+          "timeField": "@timestamp"
+        }
+      ],
+      "title": "Errors",
+      "type": "stat"
     },
     {
-      "datasource": {
-        "type": "elasticsearch",
-        "uid": "Elasticsearch-Logs"
-      },
+      "datasource": { "type": "elasticsearch", "uid": "Elasticsearch-Logs" },
       "gridPos": { "h": 4, "w": 12, "x": 12, "y": 0 },
       "id": 3,
       "options": {
         "legend": { "displayMode": "list", "placement": "right" },
         "pieType": "pie",
-        "reduceOptions": {
-          "calcs": ["sum"],
-          "fields": "",
-          "values": false
-        },
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
         "tooltip": { "mode": "single" }
       },
-      "pluginVersion": "10.3.3",
       "targets": [
         {
           "datasource": { "type": "elasticsearch", "uid": "Elasticsearch-Logs" },
@@ -124,11 +100,8 @@
       "type": "piechart"
     },
     {
-      "datasource": {
-        "type": "elasticsearch",
-        "uid": "Elasticsearch-Logs"
-      },
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "datasource": { "type": "elasticsearch", "uid": "Elasticsearch-Logs" },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 4 },
       "id": 4,
       "options": {
         "dedupStrategy": "none",
@@ -140,7 +113,6 @@
         "sortOrder": "Descending",
         "wrapLogMessage": false
       },
-      "pluginVersion": "10.3.3",
       "targets": [
         {
           "datasource": { "type": "elasticsearch", "uid": "Elasticsearch-Logs" },
@@ -154,11 +126,29 @@
       "type": "logs"
     },
     {
-      "datasource": {
-        "type": "elasticsearch",
-        "uid": "Elasticsearch-Logs"
+      "datasource": { "type": "elasticsearch", "uid": "Elasticsearch-Logs" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1,
+            "scaleDistribution": { "type": "linear" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
       },
-      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 12 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
       "id": 5,
       "options": {
         "barRadius": 0,
@@ -166,13 +156,12 @@
         "groupWidth": 0.7,
         "legend": { "displayMode": "list", "placement": "bottom" },
         "orientation": "auto",
-        "showValue": "auto",
+        "showValue": "never",
         "stacking": "normal",
         "tooltip": { "mode": "single" },
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "10.3.3",
       "targets": [
         {
           "datasource": { "type": "elasticsearch", "uid": "Elasticsearch-Logs" },
@@ -181,7 +170,7 @@
             {
               "field": "@timestamp",
               "id": "2",
-              "settings": { "interval": "auto" },
+              "settings": { "interval": "auto", "min_doc_count": "0", "trimEdges": "0" },
               "type": "date_histogram"
             },
             {
@@ -203,9 +192,7 @@
   "refresh": "10s",
   "schemaVersion": 39,
   "tags": ["openclaw", "logs"],
-  "templating": {
-    "list": []
-  },
+  "templating": { "list": [] },
   "time": { "from": "now-1h", "to": "now" },
   "timepicker": {},
   "timezone": "",
