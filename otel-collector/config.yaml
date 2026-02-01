@@ -14,63 +14,38 @@ receivers:
 
 processors:
   batch:
-    timeout: 10s
-    send_batch_size: 1024
+    timeout: 5s
+    send_batch_size: 512
 
   memory_limiter:
     check_interval: 1s
     limit_mib: 512
     spike_limit_mib: 128
 
-  # Add resource attributes for better filtering
   resource:
     attributes:
       - key: deployment.environment
         value: local
         action: upsert
 
-  # Filter out noisy spans if needed
-  filter/traces:
-    error_mode: ignore
-    traces:
-      span:
-        # Example: exclude health checks
-        - 'attributes["http.target"] == "/health"'
-
 exporters:
-  # Debug output (disable in production)
   debug:
-    verbosity: basic
-    sampling_initial: 5
-    sampling_thereafter: 200
+    verbosity: detailed
 
-  # Elasticsearch for logs and traces
   elasticsearch:
     endpoints:
       - http://elasticsearch:9200
     logs_index: openclaw-logs
     traces_index: openclaw-traces
-    sending_queue:
-      enabled: true
-      num_consumers: 10
-      queue_size: 1000
-    retry:
-      enabled: true
-      initial_interval: 100ms
-      max_interval: 30s
+    flush:
+      bytes: 1048576
+      interval: 5s
 
-  # Prometheus metrics endpoint (Grafana scrapes this)
   prometheus:
     endpoint: 0.0.0.0:8889
     namespace: openclaw
     const_labels:
       service: openclaw-gateway
-
-  # OTLP to Langfuse
-  otlphttp/langfuse:
-    endpoint: http://langfuse:3000/api/public/otel
-    headers:
-      Authorization: "Basic cGstbGYtOThjNDMwMGMtZDE1Yi00YTRkLThiMTYtNmIzYjQ0NjZjODI1OnNrLWxmLTQzMzlmOGQ2LWJhMjEtNGI5Zi1hMTUyLTliZmI3OWMyYjdkNw=="
 
 extensions:
   health_check:
@@ -86,7 +61,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch, resource]
-      exporters: [elasticsearch, otlphttp/langfuse, debug]
+      exporters: [elasticsearch, debug]
 
     metrics:
       receivers: [otlp]
@@ -100,6 +75,6 @@ service:
 
   telemetry:
     logs:
-      level: info
+      level: debug
     metrics:
       address: 0.0.0.0:8888
