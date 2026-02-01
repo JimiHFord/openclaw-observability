@@ -66,12 +66,11 @@ exporters:
     const_labels:
       service: openclaw-gateway
 
-  # OTLP to Langfuse (if you have cloud or self-hosted with OTLP support)
-  # Uncomment and configure if using Langfuse OTLP endpoint
-  # otlphttp/langfuse:
-  #   endpoint: http://langfuse:3000/api/public/otel
-  #   headers:
-  #     Authorization: "Basic ${LANGFUSE_API_KEY}"
+  # OTLP to Langfuse
+  otlphttp/langfuse:
+    endpoint: http://langfuse:3000/api/public/otel
+    headers:
+      Authorization: "Basic cGstbGYtOThjNDMwMGMtZDE1Yi00YTRkLThiMTYtNmIzYjQ0NjZjODI1OnNrLWxmLTQzMzlmOGQ2LWJhMjEtNGI5Zi1hMTUyLTliZmI3OWMyYjdkNw=="
 
 extensions:
   health_check:
@@ -87,7 +86,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch, resource]
-      exporters: [elasticsearch, debug]
+      exporters: [elasticsearch, otlphttp/langfuse, debug]
 
     metrics:
       receivers: [otlp]
