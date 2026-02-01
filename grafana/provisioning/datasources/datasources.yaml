@@ -3,19 +3,21 @@
 apiVersion: 1
 
 datasources:
-  # Elasticsearch - Logs & Traces
+  # Elasticsearch - OpenClaw Logs
   - name: Elasticsearch-Logs
     type: elasticsearch
     access: proxy
     url: http://elasticsearch:9200
-    database: openclaw-logs
+    database: "[openclaw-logs-]YYYY.MM.DD"
     isDefault: false
     jsonData:
       esVersion: "8.0.0"
       timeField: "@timestamp"
-      logMessageField: body
-      logLevelField: severity_text
+      logMessageField: message
+      logLevelField: level
+      interval: Daily
 
+  # Elasticsearch - OTel Traces
   - name: Elasticsearch-Traces
     type: elasticsearch
     access: proxy
