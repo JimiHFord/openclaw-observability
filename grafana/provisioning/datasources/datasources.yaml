@@ -1,0 +1,38 @@
+# Grafana Datasource Provisioning
+
+apiVersion: 1
+
+datasources:
+  # Elasticsearch - Logs & Traces
+  - name: Elasticsearch-Logs
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    database: openclaw-logs
+    isDefault: false
+    jsonData:
+      esVersion: "8.0.0"
+      timeField: "@timestamp"
+      logMessageField: body
+      logLevelField: severity_text
+
+  - name: Elasticsearch-Traces
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    database: openclaw-traces
+    isDefault: false
+    jsonData:
+      esVersion: "8.0.0"
+      timeField: "@timestamp"
+
+  # Prometheus metrics from OTel Collector
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://otel-collector:8889
+    isDefault: true
+    jsonData:
+      httpMethod: POST
+      manageAlerts: true
+      prometheusType: Prometheus

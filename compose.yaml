@@ -1,0 +1,144 @@
+# OpenClaw Observability Stack
+# Compatible with Podman Compose
+
+services:
+  # ===========================================================================
+  # OpenTelemetry Collector - Central ingestion point
+  # ===========================================================================
+  otel-collector:
+    image: docker.io/otel/opentelemetry-collector-contrib:0.96.0
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector/config.yaml"]
+    volumes:
+      - ./otel-collector/config.yaml:/etc/otel-collector/config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8888:8888"   # Prometheus metrics (collector self)
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  # ===========================================================================
+  # Langfuse - LLM Observability
+  # ===========================================================================
+  langfuse-postgres:
+    image: docker.io/postgres:16-alpine
+    container_name: langfuse-postgres
+    environment:
+      POSTGRES_USER: ${LANGFUSE_POSTGRES_USER:-langfuse}
+      POSTGRES_PASSWORD: ${LANGFUSE_POSTGRES_PASSWORD:-langfuse}
+      POSTGRES_DB: ${LANGFUSE_POSTGRES_DB:-langfuse}
+    volumes:
+      - langfuse-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${LANGFUSE_POSTGRES_USER:-langfuse}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  langfuse:
+    image: docker.io/langfuse/langfuse:2
+    container_name: langfuse
+    environment:
+      DATABASE_URL: postgresql://${LANGFUSE_POSTGRES_USER:-langfuse}:${LANGFUSE_POSTGRES_PASSWORD:-langfuse}@langfuse-postgres:5432/${LANGFUSE_POSTGRES_DB:-langfuse}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-me-to-a-random-string-32}
+      SALT: ${SALT:-change-me-to-a-random-string-32}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3100}
+      TELEMETRY_ENABLED: "false"
+      LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: "true"
+    ports:
+      - "3100:3000"
+    depends_on:
+      langfuse-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ===========================================================================
+  # Elasticsearch - Log & Trace Storage
+  # ===========================================================================
+  elasticsearch:
+    image: docker.io/elasticsearch:8.12.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - ES_JAVA_OPTS=${ES_JAVA_OPTS:--Xms1g -Xmx1g}
+      - cluster.name=openclaw-obs
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # ===========================================================================
+  # Kibana - Log Visualization
+  # ===========================================================================
+  kibana:
+    image: docker.io/kibana:8.12.2
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - XPACK_SECURITY_ENABLED=false
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ===========================================================================
+  # Grafana - Dashboards & Alerting
+  # ===========================================================================
+  grafana:
+    image: docker.io/grafana/grafana:10.3.3
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=${GF_USERS_ALLOW_SIGN_UP:-false}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  # ===========================================================================
+  # Logstash - File Log Ingestion (Optional)
+  # ===========================================================================
+  logstash:
+    image: docker.io/logstash:8.12.2
+    container_name: logstash
+    profiles:
+      - logstash
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ${OPENCLAW_LOG_PATH:-/tmp/openclaw}:/var/log/openclaw:ro
+    environment:
+      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  elasticsearch-data:
+  grafana-data:
+  langfuse-postgres-data:

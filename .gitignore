@@ -1,0 +1,20 @@
+# Environment
+.env
+
+# Data directories (if mounted locally)
+data/
+elasticsearch/data/
+grafana/data/
+
+# Podman/Docker
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
