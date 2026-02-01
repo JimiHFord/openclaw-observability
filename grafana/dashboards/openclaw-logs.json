@@ -109,7 +109,7 @@
           "metrics": [{ "id": "1", "type": "count" }],
           "bucketAggs": [
             {
-              "field": "level.keyword",
+              "field": "level",
               "id": "2",
               "settings": { "min_doc_count": "1", "order": "desc", "orderBy": "_count", "size": "10" },
               "type": "terms"
@@ -185,7 +185,7 @@
               "type": "date_histogram"
             },
             {
-              "field": "level.keyword",
+              "field": "level",
               "id": "3",
               "settings": { "min_doc_count": "1", "order": "desc", "orderBy": "_count", "size": "5" },
               "type": "terms"
